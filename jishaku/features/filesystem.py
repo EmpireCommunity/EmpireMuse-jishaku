@@ -26,6 +26,25 @@ from jishaku.hljs import get_language, guess_file_traits
 from jishaku.paginators import PaginatorInterface, WrappedFilePaginator, use_file_check
 
 
+MAX_CURL_BYTES = 8 * 1024 * 1024
+
+
+async def read_limited(response, limit: int = MAX_CURL_BYTES):
+    """
+    Reads an aiohttp response body, but gives up (returns None) as soon as it passes ``limit`` bytes.
+    """
+
+    data = bytearray()
+
+    async for chunk in response.content.iter_chunked(64 * 1024):
+        data += chunk
+
+        if len(data) > limit:
+            return None
+
+    return bytes(data)
+
+
 class FilesystemFeature(Feature):
     """
     Feature containing the filesystem-related commands
@@ -67,7 +86,11 @@ class FilesystemFeature(Feature):
             return await ctx.send(f"`{path}`: Cowardly refusing to read a file >128MB.")
 
         try:
-            with open(path, "rb") as file:
+            with open(path, "rb") as opened:
+                # read once so secrets can be masked; size was already capped above
+                file = io.BytesIO(self.mask_bytes(opened.read()))
+                file.name = opened.name
+
                 if use_file_check(ctx, size):
                     if line_span:
                         content, *_ = guess_file_traits(file.read())
@@ -103,18 +126,23 @@ class FilesystemFeature(Feature):
         # remove embed maskers if present
         url = url.lstrip("<").rstrip(">")
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx.message, mask=self.mask):
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
-                    data = await response.read()
+                    data = await read_limited(response)
                     hints = (
                         response.content_type,
                         url
                     )
                     code = response.status
 
+            if data is None:
+                return await ctx.send(f"HTTP response is larger than {MAX_CURL_BYTES // (1024 ** 2)} MiB, refusing to read it (status code {code}).")
+
             if not data:
                 return await ctx.send(f"HTTP response was empty (status code {code}).")
+
+            data = self.mask_bytes(data)
 
             if use_file_check(ctx, len(data)):  # File "full content" preview limit
                 # Shallow language detection

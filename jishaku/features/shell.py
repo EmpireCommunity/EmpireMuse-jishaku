@@ -34,13 +34,13 @@ class ShellFeature(Feature):
         Execution can be cancelled by closing the paginator.
         """
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx.message, mask=self.mask):
             with self.submit(ctx):
                 with ShellReader(argument.content) as reader:
                     prefix = "```" + reader.highlight
 
                     paginator = WrappedPaginator(prefix=prefix, max_size=1975)
-                    paginator.add_line(f"{reader.ps1} {argument.content}\n")
+                    paginator.add_line(self.mask(f"{reader.ps1} {argument.content}\n"))
 
                     interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
                     self.bot.loop.create_task(interface.send_to(ctx))
@@ -48,7 +48,7 @@ class ShellFeature(Feature):
                     async for line in reader:
                         if interface.closed:
                             return
-                        await interface.add_line(line)
+                        await interface.add_line(self.mask(line))
 
                 await interface.add_line(f"\n[status] Return code {reader.close_code}")
 

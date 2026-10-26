@@ -105,11 +105,13 @@ class PythonFeature(Feature):
                 result = repr(result)
 
         if isinstance(result, str):
+            result = self.mask(result)
+
             if len(result) <= 2000:
                 if result.strip() == '':
                     result = "\u200b"
 
-                return await ctx.send(result.replace(self.bot.http.token, "[token omitted]"))
+                return await ctx.send(result)
 
             if use_file_check(ctx, len(result)):  # File "full content" preview limit
                 # Discord's desktop and web client now supports an interactive file content
@@ -143,7 +145,7 @@ class PythonFeature(Feature):
         scope = self.scope
 
         try:
-            async with ReplResponseReactor(ctx.message):
+            async with ReplResponseReactor(ctx.message, mask=self.mask):
                 with self.submit(ctx):
                     executor = AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict)
                     async for send, result in AsyncSender(executor):
@@ -169,13 +171,13 @@ class PythonFeature(Feature):
         scope = self.scope
 
         try:
-            async with ReplResponseReactor(ctx.message):
+            async with ReplResponseReactor(ctx.message, mask=self.mask):
                 with self.submit(ctx):
                     executor = AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict)
                     async for send, result in AsyncSender(executor):
                         self.last_result = result
 
-                        header = repr(result).replace("``", "`\u200b`").replace(self.bot.http.token, "[token omitted]")
+                        header = self.mask(repr(result)).replace("``", "`\u200b`")
 
                         if len(header) > 485:
                             header = header[0:482] + "..."
@@ -185,7 +187,7 @@ class PythonFeature(Feature):
                         for name, res in all_inspections(result):
                             lines.append(f"{name:16.16} :: {res}")
 
-                        text = "\n".join(lines)
+                        text = self.mask("\n".join(lines))
 
                         if use_file_check(ctx, len(text)):  # File "full content" preview limit
                             send(await ctx.send(file=disnake.File(
@@ -210,8 +212,8 @@ class PythonFeature(Feature):
 
         arg_dict = get_var_dict_from_ctx(ctx, Flags.SCOPE_PREFIX)
 
-        async with ReplResponseReactor(ctx.message):
-            text = "\n".join(disassemble(argument.content, arg_dict=arg_dict))
+        async with ReplResponseReactor(ctx.message, mask=self.mask):
+            text = self.mask("\n".join(disassemble(argument.content, arg_dict=arg_dict)))
 
             if use_file_check(ctx, len(text)):  # File "full content" preview limit
                 await ctx.send(file=disnake.File(

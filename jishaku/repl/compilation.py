@@ -120,7 +120,10 @@ class AsyncCodeExecutor:
         self.source = code
         self.code = wrap_code(code, args=', '.join(self.arg_names))
         self.scope = scope or Scope()
-        self.loop = loop or asyncio.get_event_loop()
+        try:
+            self.loop = loop or asyncio.get_running_loop()
+        except RuntimeError:  # criado fora de uma corrotina; o laço só é usado quando há um em execução
+            self.loop = loop
 
     def __aiter__(self):
         exec(compile(self.code, '<repl>', 'exec'), self.scope.globals, self.scope.locals)

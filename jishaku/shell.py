@@ -18,9 +18,47 @@ import re
 import subprocess
 import sys
 import time
+import typing
+
+from jishaku.flags import Flags
 
 SHELL = os.getenv("SHELL") or "/bin/bash"
 WINDOWS = sys.platform == "win32"
+
+# Variables a shell command needs to work. Everything else (tokens, database URLs...) is NOT passed on.
+SHELL_ENV_ALLOWLIST = ("PATH", "HOME", "LANG", "LC_ALL", "TZ", "USER", "LOGNAME", "GIT_DIR")
+SHELL_ENV_ALLOWLIST_WINDOWS = ("SystemRoot", "COMSPEC", "PATHEXT", "TEMP", "TMP", "USERPROFILE")
+
+
+def build_shell_env(
+    environ: typing.Mapping[str, str],
+    extra: typing.Iterable[str] = (),
+    *,
+    windows: bool = WINDOWS
+) -> typing.Dict[str, str]:
+    """
+    A copy of ``environ`` with only the allowlisted variables (on Windows the names are case-insensitive).
+    """
+
+    allowed = SHELL_ENV_ALLOWLIST + (SHELL_ENV_ALLOWLIST_WINDOWS if windows else ()) + tuple(extra)
+
+    if windows:
+        wanted = {name.casefold() for name in allowed}
+        return {key: value for key, value in environ.items() if key.casefold() in wanted}
+
+    return {name: environ[name] for name in allowed if name in environ}
+
+
+def default_shell_env() -> typing.Optional[typing.Dict[str, str]]:
+    """
+    The environment for shell commands: ``None`` (inherit everything) only with ``JISHAKU_SHELL_INHERIT_ENV``.
+    """
+
+    if Flags.SHELL_INHERIT_ENV:
+        return None
+
+    extra = [name.strip() for name in Flags.SHELL_ENV_ALLOW.split(',') if name.strip()]
+    return build_shell_env(os.environ, extra)
 
 
 def background_reader(stream, loop: asyncio.AbstractEventLoop, callback):
@@ -48,7 +86,7 @@ class ShellReader:
                 print(x)
     """
 
-    def __init__(self, code: str, timeout: int = 120, loop: asyncio.AbstractEventLoop = None):
+    def __init__(self, code: str, timeout: int = 120, loop: asyncio.AbstractEventLoop = None, env: typing.Optional[typing.Mapping[str, str]] = None):
         if WINDOWS:
             # Check for powershell
             if pathlib.Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe").exists():
@@ -64,10 +102,12 @@ class ShellReader:
             self.ps1 = "$"
             self.highlight = "sh"
 
-        self.process = subprocess.Popen(sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.process = subprocess.Popen(
+            sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=default_shell_env() if env is None else env
+        )
         self.close_code = None
 
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = loop or asyncio.get_running_loop()
         self.timeout = timeout
 
         self.stdout_task = self.make_reader_task(self.process.stdout, self.stdout_handler)

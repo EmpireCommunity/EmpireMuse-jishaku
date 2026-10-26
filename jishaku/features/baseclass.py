@@ -14,10 +14,14 @@ The base Feature class that serves as the superclass of all feature components.
 import asyncio
 import collections
 import contextlib
+import re
 import typing
 from datetime import datetime, timezone
 
 from disnake.ext import commands
+
+from jishaku.flags import Flags
+from jishaku.secrets import bot_secret_values, mask_secrets
 
 __all__ = (
     'Feature',
@@ -54,11 +58,11 @@ class Feature(commands.Cog):
             self.callback = callback
             return self
 
-    load_time: datetime = datetime.utcnow().replace(tzinfo=timezone.utc)
+    load_time: datetime = datetime.now(timezone.utc)
 
     def __init__(self, *args, **kwargs):
         self.bot: commands.Bot = kwargs.pop('bot')
-        self.start_time: datetime = datetime.utcnow().replace(tzinfo=timezone.utc)
+        self.start_time: datetime = datetime.now(timezone.utc)
         self.tasks = collections.deque()
         self.task_count: int = 0
 
@@ -123,14 +127,66 @@ class Feature(commands.Cog):
         # Don't really think this does much, but init Cog anyway.
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    def allowed_owner_ids() -> typing.Optional[typing.Set[int]]:
+        """
+        The IDs from ``JISHAKU_OWNER_IDS``, or None when the flag is not set.
+        An invalid entry makes the result an empty set, which denies everybody (fail closed).
+        """
+
+        tokens = [token for token in re.split(r'[,\s]+', Flags.OWNER_IDS.strip()) if token]
+
+        if not tokens:
+            return None
+
+        if not all(token.isdigit() for token in tokens):
+            return set()
+
+        return {int(token) for token in tokens}
+
     async def cog_check(self, ctx: commands.Context):
         """
-        Local check, makes all commands in resulting cogs owner-only
+        Local check, makes all commands in resulting cogs owner-only.
+
+        Optionally also limited to a list of IDs (``JISHAKU_OWNER_IDS``) and to direct messages (``JISHAKU_DM_ONLY``).
         """
 
         if not await ctx.bot.is_owner(ctx.author):
             raise commands.NotOwner("You must own this bot to use Jishaku.")
+
+        allowed = self.allowed_owner_ids()
+        if allowed is not None and ctx.author.id not in allowed:
+            raise commands.NotOwner("You are not in the list of Jishaku owners.")
+
+        if Flags.DM_ONLY and ctx.guild is not None:
+            raise commands.PrivateMessageOnly("Jishaku commands only work in direct messages.")
+
         return True
+
+    def mask(self, text: str) -> str:
+        """
+        Replaces known secrets (bot token, environment values named like TOKEN/SECRET/KEY...) in text bound for Discord.
+
+        Turn it off with ``JISHAKU_MASK_SECRETS=false`` or ``Flags.MASK_SECRETS = False``.
+        """
+
+        if not Flags.MASK_SECRETS:
+            return text
+
+        return mask_secrets(text, bot_secret_values(self.bot))
+
+    def mask_bytes(self, data: bytes) -> bytes:
+        """
+        Same as :meth:`mask`, for the contents of a file or HTTP response (decoded as UTF-8 when possible).
+        """
+
+        try:
+            text = data.decode('utf-8')
+        except UnicodeDecodeError:
+            return data
+
+        masked = self.mask(text)
+        return data if masked == text else masked.encode('utf-8')
 
     @contextlib.contextmanager
     def submit(self, ctx: commands.Context):

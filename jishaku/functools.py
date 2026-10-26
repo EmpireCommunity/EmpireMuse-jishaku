@@ -57,7 +57,7 @@ def executor_function(sync_function: typing.Callable):
         Asynchronous function that wraps a sync function with an executor.
         """
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         internal_function = functools.partial(sync_function, *args, **kwargs)
         return await loop.run_in_executor(None, internal_function)
 

@@ -13,6 +13,7 @@ Functions pertaining to the disassembly of Python code
 
 import ast
 import dis
+import io
 
 import import_expression
 
@@ -88,16 +89,9 @@ def disassemble(code: str, scope: Scope = None, arg_dict: dict = None):
 
     func_def = scope.locals.get('_repl_coroutine') or scope.globals['_repl_coroutine']
 
-    co = func_def.__code__
+    # API pública: os auxiliares privados do módulo dis (_get_instructions_bytes, Instruction._disassemble) mudam a
+    # assinatura a cada versão do Python e já quebraram no 3.13.
+    buffer = io.StringIO()
+    dis.dis(func_def.__code__, file=buffer)
 
-    for instruction in dis._get_instructions_bytes(
-        co.co_code, co.co_varnames, co.co_names, co.co_consts,
-        co.co_cellvars + co.co_freevars, dict(dis.findlinestarts(co)),
-        line_offset=0
-    ):
-        if instruction.starts_line is not None and instruction.offset > 0:
-            yield ''
-
-        yield instruction._disassemble(
-            4, False, 4
-        )
+    yield from buffer.getvalue().splitlines()
