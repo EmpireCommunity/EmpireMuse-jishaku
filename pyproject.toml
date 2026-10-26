@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "empiremuse-jishaku"
+dynamic = ["version"]
+description = "Fork do jishaku para disnake usado pelo EmpireMuse: ferramentas de depuração e desenvolvimento para bots."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [
+    { name = "EmpireCommunity" },
+]
+keywords = ["jishaku", "disnake", "discord", "cog", "repl", "extension", "empiremuse"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Communications :: Chat",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "braceexpand>=0.1.7",
+    "click>=8.0.1",
+    "disnake>=2.12,<3",
+    "import_expression>=1.0.0,<2.0.0",
+]
+
+[project.optional-dependencies]
+voice = ["disnake[voice]>=2.12,<3", "youtube-dl"]
+procinfo = ["psutil"]
+dev = ["build", "pytest", "ruff"]
+
+[project.urls]
+Repository = "https://github.com/EmpireCommunity/EmpireMuse-jishaku"
+Issues = "https://github.com/EmpireCommunity/EmpireMuse/issues"
+Upstream = "https://github.com/scarletcafe/jishaku"
+Changelog = "https://github.com/EmpireCommunity/EmpireMuse-jishaku/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+include = ["jishaku*"]
+
+# O arquivo meta.py é a única fonte da versão (lida sem importar o pacote, que exige o disnake).
+[tool.setuptools.dynamic]
+version = { attr = "jishaku.meta.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 160
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "E722"]
+ignore = [
+    "F403",  # `import *` é a forma como o jishaku reexporta a API pública (cada módulo define __all__)
+    "F405",
+]

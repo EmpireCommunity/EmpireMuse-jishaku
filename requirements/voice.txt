@@ -1,2 +1,0 @@
-disnake[voice]>=2.1.5
-youtube-dl

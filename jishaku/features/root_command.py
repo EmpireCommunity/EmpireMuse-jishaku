@@ -21,6 +21,7 @@ from disnake.ext import commands
 
 from jishaku.features.baseclass import Feature
 from jishaku.flags import Flags, ENABLED_SYMBOLS
+from jishaku.meta import __version__
 from jishaku.modules import package_version
 from jishaku.paginators import PaginatorInterface
 
@@ -64,7 +65,7 @@ class RootCommand(Feature):
         """
 
         summary = [
-            f"disnake-jishaku v{package_version('disnake-jishaku')}, "
+            f"empiremuse-jishaku v{__version__}, "
             f"disnake `{package_version('disnake')}`, "
 
             f"`Python {sys.version}` on `{sys.platform}`".replace("\n", ""),
