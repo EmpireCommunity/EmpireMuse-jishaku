@@ -48,7 +48,7 @@ bot.load_extension("jishaku")
 
 Extras opcionais: `empiremuse-jishaku[voice]` (comandos de voz) e `empiremuse-jishaku[procinfo]` (uso de CPU e memória no `jsk`).
 
-Requisitos: Python 3.10 ou superior; testado com `disnake` 2.12.2 em Python 3.10 a 3.13.
+Requisitos: Python 3.10 ou superior; testado com `disnake` 2.12.2 em Python 3.10 a 3.14.
 
 ## Comandos
 
@@ -97,7 +97,7 @@ python -m pytest
 python -m build --wheel
 ```
 
-O CI (`.github/workflows/ci.yml`) roda lint, a suíte em Python 3.10–3.13 e a construção da wheel com instalação num ambiente limpo. Uma tag `vX.Y.Z[.postN]` em `main` dispara o `release.yml`, que publica a wheel e o `SHA256SUMS`. Mudanças seguem [Conventional Commits](https://www.conventionalcommits.org/pt-br/) e entram no [`CHANGELOG.md`](CHANGELOG.md).
+O CI (`.github/workflows/ci.yml`) roda lint, a suíte em Python 3.10–3.14 e a construção da wheel com instalação num ambiente limpo. Uma tag `vX.Y.Z[.postN]` em `main` dispara o `release.yml`, que publica a wheel e o `SHA256SUMS`. Mudanças seguem [Conventional Commits](https://www.conventionalcommits.org/pt-br/) e entram no [`CHANGELOG.md`](CHANGELOG.md).
 
 Problemas de segurança: siga a [política do EmpireMuse](https://github.com/EmpireCommunity/EmpireMuse/blob/main/.github/SECURITY.md); não abra issue pública com detalhes exploráveis.
 
