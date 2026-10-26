@@ -54,11 +54,11 @@ class Feature(commands.Cog):
             self.callback = callback
             return self
 
-    load_time: datetime = datetime.utcnow().replace(tzinfo=timezone.utc)
+    load_time: datetime = datetime.now(timezone.utc)
 
     def __init__(self, *args, **kwargs):
         self.bot: commands.Bot = kwargs.pop('bot')
-        self.start_time: datetime = datetime.utcnow().replace(tzinfo=timezone.utc)
+        self.start_time: datetime = datetime.now(timezone.utc)
         self.tasks = collections.deque()
         self.task_count: int = 0
 

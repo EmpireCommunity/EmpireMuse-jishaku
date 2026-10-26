@@ -40,3 +40,15 @@ def test_reescritas_nao_usam_apis_do_ast_removidas_no_python_314():
         warnings.simplefilter("error", DeprecationWarning)
         assert run("return 1") == [1]
         assert run("z = 2\ndel z\n3") == [3]
+
+
+def test_executor_pode_ser_criado_fora_de_uma_corrotina():
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        executor = AsyncCodeExecutor("1")
+    assert executor.loop is None
+
+    async def collect():
+        return [result async for _, result in AsyncSender(executor)]
+
+    assert asyncio.run(collect()) == [1]

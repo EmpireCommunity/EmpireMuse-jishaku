@@ -89,7 +89,7 @@ class ReactionProcedureTimer:
 
     def __init__(self, message: disnake.Message, loop: typing.Optional[asyncio.BaseEventLoop] = None):
         self.message = message
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = loop or asyncio.get_running_loop()
         self.handle = None
         self.raised = False
 

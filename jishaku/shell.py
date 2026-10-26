@@ -67,7 +67,7 @@ class ShellReader:
         self.process = subprocess.Popen(sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.close_code = None
 
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = loop or asyncio.get_running_loop()
         self.timeout = timeout
 
         self.stdout_task = self.make_reader_task(self.process.stdout, self.stdout_handler)
