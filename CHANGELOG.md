@@ -1,9 +1,20 @@
 # Changelog
 
 Todas as mudanças relevantes deste fork ficam aqui. O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/)
-e as versões seguem o [PEP 440](https://peps.python.org/pep-0440/) (`2.6.6.post1` = base 2.6.6 do disnake-jishaku mais o sufixo do fork).
+e as versões seguem o [PEP 440](https://peps.python.org/pep-0440/) (`2.6.6.post2` = base 2.6.6 do disnake-jishaku mais o sufixo do fork).
 
 ## [Não lançado]
+
+## [2.6.6.post2] - 2026-10-25
+
+### Segurança
+
+- O mascaramento de segredos passa a reconhecer também variáveis `LAVALINK_NODE_*`, `SPOTIFY_CLIENT_*` e `LASTFM*` (mesma lista do EmpireMuse); antes o valor delas saía em claro. Teste de regressão incluído.
+- `build` e `setuptools` do CI e do release ficam fixados por versão e hash (`requirements/build.txt`, instalado com `--require-hashes`) e a wheel é construída com `--no-isolation`.
+
+### Corrigido
+
+- Este CHANGELOG dizia testes em Python 3.10 a 3.13; o CI cobre até o 3.14.
 
 ## [2.6.6.post1] - 2026-10-25
 
@@ -12,7 +23,7 @@ Primeira versão do fork da EmpireCommunity, a partir do commit `14d2dbd51d61382
 ### Adicionado
 
 - Pacote `empiremuse-jishaku` (nome distinto dos do PyPI), versão lida de `jishaku/meta.py`, `pyproject.toml` no lugar do `setup.py`.
-- CI com lint (ruff), testes em Python 3.10 a 3.13 e construção da wheel com instalação num ambiente limpo; workflow de release que publica a wheel e o `SHA256SUMS`.
+- CI com lint (ruff), testes em Python 3.10 a 3.14 e construção da wheel com instalação num ambiente limpo; workflow de release que publica a wheel e o `SHA256SUMS`.
 - README em português, `CHANGELOG.md` e testes automatizados (o fork original não tinha nenhum).
 
 ### Corrigido
