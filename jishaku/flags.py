@@ -167,6 +167,13 @@ class Flags(metaclass=FlagMeta):
     # Flag to indicate usage of braille J in shutdown command
     USE_BRAILLE_J: bool
 
+    # Flag to indicate that Jishaku commands only work in direct messages, never in a server channel.
+    DM_ONLY: bool
+
+    # IDs separated by commas that may use Jishaku. When set, being a bot owner is not enough: the author must also be in the
+    # list (this keeps members of the application's team out). An invalid list denies everybody.
+    OWNER_IDS: str
+
     # Flag to indicate that `jsk sh` and friends should inherit the whole environment of the bot process (tokens included).
     # Off by default: the shell gets only a short allowlist (PATH, HOME, LANG...) plus SHELL_ENV_ALLOW.
     SHELL_INHERIT_ENV: bool

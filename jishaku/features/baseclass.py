@@ -14,6 +14,7 @@ The base Feature class that serves as the superclass of all feature components.
 import asyncio
 import collections
 import contextlib
+import re
 import typing
 from datetime import datetime, timezone
 
@@ -126,13 +127,40 @@ class Feature(commands.Cog):
         # Don't really think this does much, but init Cog anyway.
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    def allowed_owner_ids() -> typing.Optional[typing.Set[int]]:
+        """
+        The IDs from ``JISHAKU_OWNER_IDS``, or None when the flag is not set.
+        An invalid entry makes the result an empty set, which denies everybody (fail closed).
+        """
+
+        tokens = [token for token in re.split(r'[,\s]+', Flags.OWNER_IDS.strip()) if token]
+
+        if not tokens:
+            return None
+
+        if not all(token.isdigit() for token in tokens):
+            return set()
+
+        return {int(token) for token in tokens}
+
     async def cog_check(self, ctx: commands.Context):
         """
-        Local check, makes all commands in resulting cogs owner-only
+        Local check, makes all commands in resulting cogs owner-only.
+
+        Optionally also limited to a list of IDs (``JISHAKU_OWNER_IDS``) and to direct messages (``JISHAKU_DM_ONLY``).
         """
 
         if not await ctx.bot.is_owner(ctx.author):
             raise commands.NotOwner("You must own this bot to use Jishaku.")
+
+        allowed = self.allowed_owner_ids()
+        if allowed is not None and ctx.author.id not in allowed:
+            raise commands.NotOwner("You are not in the list of Jishaku owners.")
+
+        if Flags.DM_ONLY and ctx.guild is not None:
+            raise commands.PrivateMessageOnly("Jishaku commands only work in direct messages.")
+
         return True
 
     def mask(self, text: str) -> str:
