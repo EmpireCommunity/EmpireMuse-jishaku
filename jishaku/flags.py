@@ -166,3 +166,7 @@ class Flags(metaclass=FlagMeta):
 
     # Flag to indicate usage of braille J in shutdown command
     USE_BRAILLE_J: bool
+
+    # Flag to indicate that secrets (bot token and environment values named like TOKEN, SECRET, KEY...) are replaced
+    # in everything Jishaku sends to Discord. On by default; set JISHAKU_MASK_SECRETS=false to turn it off.
+    MASK_SECRETS: bool = lambda flags: True

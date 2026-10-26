@@ -67,7 +67,11 @@ class FilesystemFeature(Feature):
             return await ctx.send(f"`{path}`: Cowardly refusing to read a file >128MB.")
 
         try:
-            with open(path, "rb") as file:
+            with open(path, "rb") as opened:
+                # read once so secrets can be masked; size was already capped above
+                file = io.BytesIO(self.mask_bytes(opened.read()))
+                file.name = opened.name
+
                 if use_file_check(ctx, size):
                     if line_span:
                         content, *_ = guess_file_traits(file.read())
@@ -103,7 +107,7 @@ class FilesystemFeature(Feature):
         # remove embed maskers if present
         url = url.lstrip("<").rstrip(">")
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx.message, mask=self.mask):
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
                     data = await response.read()
@@ -115,6 +119,8 @@ class FilesystemFeature(Feature):
 
             if not data:
                 return await ctx.send(f"HTTP response was empty (status code {code}).")
+
+            data = self.mask_bytes(data)
 
             if use_file_check(ctx, len(data)):  # File "full content" preview limit
                 # Shallow language detection

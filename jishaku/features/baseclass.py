@@ -19,6 +19,9 @@ from datetime import datetime, timezone
 
 from disnake.ext import commands
 
+from jishaku.flags import Flags
+from jishaku.secrets import bot_secret_values, mask_secrets
+
 __all__ = (
     'Feature',
     'CommandTask'
@@ -131,6 +134,31 @@ class Feature(commands.Cog):
         if not await ctx.bot.is_owner(ctx.author):
             raise commands.NotOwner("You must own this bot to use Jishaku.")
         return True
+
+    def mask(self, text: str) -> str:
+        """
+        Replaces known secrets (bot token, environment values named like TOKEN/SECRET/KEY...) in text bound for Discord.
+
+        Turn it off with ``JISHAKU_MASK_SECRETS=false`` or ``Flags.MASK_SECRETS = False``.
+        """
+
+        if not Flags.MASK_SECRETS:
+            return text
+
+        return mask_secrets(text, bot_secret_values(self.bot))
+
+    def mask_bytes(self, data: bytes) -> bytes:
+        """
+        Same as :meth:`mask`, for the contents of a file or HTTP response (decoded as UTF-8 when possible).
+        """
+
+        try:
+            text = data.decode('utf-8')
+        except UnicodeDecodeError:
+            return data
+
+        masked = self.mask(text)
+        return data if masked == text else masked.encode('utf-8')
 
     @contextlib.contextmanager
     def submit(self, ctx: commands.Context):

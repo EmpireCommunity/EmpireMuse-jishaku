@@ -143,7 +143,7 @@ class InvocationFeature(Feature):
 
         start = time.perf_counter()
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx.message, mask=self.mask):
             with self.submit(ctx):
                 await alt_ctx.command.invoke(alt_ctx)
 
@@ -209,7 +209,7 @@ class InvocationFeature(Feature):
             pass
 
         # getsourcelines for some reason returns WITH line endings
-        source_text = ''.join(source_lines)
+        source_text = self.mask(''.join(source_lines))
 
         if use_file_check(ctx, len(source_text)):  # File "full content" preview limit
             await ctx.send(file=disnake.File(

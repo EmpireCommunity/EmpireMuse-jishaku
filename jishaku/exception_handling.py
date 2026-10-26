@@ -22,7 +22,7 @@ from disnake.ext import commands
 from jishaku.flags import Flags
 
 
-async def send_traceback(destination: disnake.abc.Messageable, verbosity: int, *exc_info):
+async def send_traceback(destination: disnake.abc.Messageable, verbosity: int, *exc_info, mask=None):
     """
     Sends a traceback of an exception to a destination.
     Used when REPL fails for any reason.
@@ -30,12 +30,16 @@ async def send_traceback(destination: disnake.abc.Messageable, verbosity: int, *
     :param destination: Where to send this information to
     :param verbosity: How far back this traceback should go. 0 shows just the last stack.
     :param exc_info: Information about this exception, from sys.exc_info or similar.
+    :param mask: Optional callable that hides secrets in the traceback text before it is sent.
     :return: The last message sent
     """
 
     etype, value, trace = exc_info
 
     traceback_content = "".join(traceback.format_exception(etype, value, trace, verbosity)).replace("``", "`\u200b`")
+
+    if mask is not None:
+        traceback_content = mask(traceback_content)
 
     paginator = commands.Paginator(prefix='```py')
     for line in traceback_content.split('\n'):
@@ -85,10 +89,11 @@ class ReactionProcedureTimer:
     """
     Class that reacts to a message based on what happens during its lifetime.
     """
-    __slots__ = ('message', 'loop', 'handle', 'raised')
+    __slots__ = ('message', 'loop', 'handle', 'raised', 'mask')
 
-    def __init__(self, message: disnake.Message, loop: typing.Optional[asyncio.BaseEventLoop] = None):
+    def __init__(self, message: disnake.Message, loop: typing.Optional[asyncio.BaseEventLoop] = None, mask=None):
         self.message = message
+        self.mask = mask
         self.loop = loop or asyncio.get_running_loop()
         self.handle = None
         self.raised = False
@@ -134,12 +139,12 @@ class ReplResponseReactor(ReactionProcedureTimer):
 
         if isinstance(exc_val, (SyntaxError, asyncio.TimeoutError, subprocess.TimeoutExpired)):
             # short traceback, send to channel
-            await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
+            await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb, mask=self.mask)
         else:
             # this traceback likely needs more info, so increase verbosity, and DM it instead.
             await send_traceback(
                 self.message.channel if Flags.NO_DM_TRACEBACK else self.message.author,
-                8, exc_type, exc_val, exc_tb
+                8, exc_type, exc_val, exc_tb, mask=self.mask
             )
 
         return True  # the exception has been handled

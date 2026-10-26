@@ -55,7 +55,7 @@ class ManagementFeature(Feature):
             try:
                 method(extension)
             except Exception as exc:
-                traceback_data = ''.join(traceback.format_exception(type(exc), exc, exc.__traceback__, 1))
+                traceback_data = self.mask(''.join(traceback.format_exception(type(exc), exc, exc.__traceback__, 1)))
 
                 paginator.add_line(
                     f"{icon}\N{WARNING SIGN} `{extension}`\n```py\n{traceback_data}\n```",
@@ -82,7 +82,7 @@ class ManagementFeature(Feature):
             try:
                 self.bot.unload_extension(extension)
             except Exception as exc:
-                traceback_data = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__, 1))
+                traceback_data = self.mask("".join(traceback.format_exception(type(exc), exc, exc.__traceback__, 1)))
 
                 paginator.add_line(
                     f"{icon}\N{WARNING SIGN} `{extension}`\n```py\n{traceback_data}\n```",
