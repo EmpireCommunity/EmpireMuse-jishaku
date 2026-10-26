@@ -66,6 +66,19 @@ def test_so_valores_de_chaves_com_nome_de_segredo_e_tamanho_minimo():
     assert valores == {"abcdef123", "mongodb://u:p@h"}
 
 
+def test_nomes_do_empiremuse_tambem_sao_segredo():
+    """Regressão: o regex do fork não conhecia LAVALINK_NODE_*, SPOTIFY_CLIENT_* e LASTFM_*."""
+    ambiente = {
+        "LAVALINK_NODE_1": '{"host":"h","password":"senha-do-no-1234"}',
+        "SPOTIFY_CLIENT_ID": "id-do-spotify-123456",
+        "LASTFM_USER": "usuario-lastfm-123",
+        "LASTFM_KEY": "chave-lastfm-123456",
+        "PREFIX": "prefixo-comum-1",
+    }
+    valores = collect_secret_values(ambiente)
+    assert valores == {v for k, v in ambiente.items() if k != "PREFIX"}
+
+
 def test_mascara_do_mais_longo_para_o_mais_curto():
     assert mask_secrets("a segredo-longo b segredo", ["segredo", "segredo-longo"]) == f"a {MASK} b {MASK}"
 
