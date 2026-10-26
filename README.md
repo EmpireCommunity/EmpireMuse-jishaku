@@ -81,6 +81,11 @@ As opções são variáveis de ambiente lidas na importação do `jishaku` (valo
 | `JISHAKU_USE_BRAILLE_J` | Usa o "J" em braille no `jsk shutdown`. |
 | `JISHAKU_EMBEDDED_JSK` / `JISHAKU_EMBEDDED_JSK_COLOUR` | Mostra o resumo do `jsk` num embed (cor em `0x…`, `#…`, `rgb(…)` ou nome de `disnake.Colour`). |
 | `JISHAKU_PY_RES` | Com `false`, desliga o tratamento automático de resultados especiais (`Message`, `File`, `Embed`, paginadores) no `jsk py`. |
+| `JISHAKU_MASK_SECRETS` | Padrão `true`: troca por `[secret omitted]` o token do bot e os valores de variáveis de ambiente (e de `bot.config`) cujo nome sugere segredo (`TOKEN`, `SECRET`, `PASS`, `KEY`, `MONGO`, `WEBHOOK`…) em tudo que o jishaku envia ao Discord. |
+| `JISHAKU_SHELL_ENV_ALLOW` | Nomes de variáveis (separados por vírgula) que o `jsk sh` recebe além da lista mínima (`PATH`, `HOME`, `LANG`, `LC_ALL`, `TZ`, `USER`, `LOGNAME`, `GIT_DIR`; no Windows também `SystemRoot`, `COMSPEC`…). |
+| `JISHAKU_SHELL_INHERIT_ENV` | Com `true`, o `jsk sh` herda o ambiente inteiro do processo (comportamento antigo; **evite**). |
+| `JISHAKU_OWNER_IDS` | IDs separados por vírgula. Quando definido, além de ser dono do bot o autor precisa estar na lista (deixa de fora, por exemplo, a equipe do aplicativo no Discord). Lista inválida nega todo mundo. |
+| `JISHAKU_DM_ONLY` | Com `true`, os comandos só funcionam em mensagem direta. |
 
 ## Desenvolvimento
 

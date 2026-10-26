@@ -15,6 +15,19 @@ Primeira versão do fork da EmpireCommunity, a partir do commit `14d2dbd51d61382
 - CI com lint (ruff), testes em Python 3.10 a 3.13 e construção da wheel com instalação num ambiente limpo; workflow de release que publica a wheel e o `SHA256SUMS`.
 - README em português, `CHANGELOG.md` e testes automatizados (o fork original não tinha nenhum).
 
+### Corrigido
+
+- `jsk py` com `return` ou `del` quebrava no Python 3.14 (`ast.Str` e `ast.NameConstant` removidos); `jsk dis` quebrava no Python 3.13 (usava funções privadas do `dis`).
+- Avisos de depreciação do Python 3.12+ (`datetime.utcnow`, `asyncio.get_event_loop`), que viram erro no 3.14.
+- `jsk curl` lia a resposta inteira na memória; agora lê no máximo 8 MiB.
+- `natural_size` falhava com zero e com valores acima de YiB; `jsk invite` usava o domínio antigo do Discord.
+
+### Segurança
+
+- Token e segredos do ambiente passam a ser mascarados em toda saída enviada ao Discord (resultado curto e longo do `jsk py`, `pyi`, `dis`, `sh`, `cat`, `curl`, `src`, tracebacks e erros de `load`/`unload`); antes só o resultado curto do `jsk py` era tratado. Desligue com `JISHAKU_MASK_SECRETS=false`.
+- `jsk sh`, `git` e `pip` rodam com ambiente mínimo em vez de herdar o do bot (`JISHAKU_SHELL_ENV_ALLOW` libera nomes extras; `JISHAKU_SHELL_INHERIT_ENV=true` restaura o comportamento antigo).
+- Novas travas opcionais na guarda dos comandos: `JISHAKU_OWNER_IDS` e `JISHAKU_DM_ONLY`.
+
 ### Alterado
 
 - Branch padrão renomeada de `master` para `main`.
