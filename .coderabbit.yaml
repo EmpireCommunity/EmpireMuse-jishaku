@@ -1,0 +1,135 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# Configuração do CodeRabbit do EmpireMuse-jishaku (arquivo por repositório; não herda da organização).
+# Problema que resolve: revisão genérica não conhece as garantias de segurança deste fork (mascaramento de segredos,
+# ambiente mínimo do `jsk sh`). Custo: 1 arquivo a manter. Revisão desta configuração: 2027-01-24.
+
+language: pt-BR
+tone_instructions: >-
+  Revisor técnico objetivo, em pt-BR. Foco em bugs, segurança e regressões. Cite arquivo:linha, agrupe repetições
+  em um só comentário e não elogie.
+inheritance: false
+
+reviews:
+  profile: chill
+  # Falso de propósito: o modo `error` dos checks de pré-merge só sinaliza; o bloqueio de merge é da proteção de branch.
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  collapse_walkthrough: true
+  changed_files_summary: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  poem: false
+  in_progress_fortune: false
+  suggested_reviewers: false
+  suggested_labels: false
+  auto_apply_labels: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+    base_branches:
+      - main
+    ignore_title_keywords:
+      - "WIP"
+      - "[skip review]"
+
+  path_filters:
+    - "!requirements/*.txt"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!build/**"
+    - "!*.egg-info/**"
+
+  path_instructions:
+    - path: "jishaku/**/*.py"
+      instructions: |
+        - Fork do jishaku para disnake: manter compatibilidade com disnake >= 2.12 (< 3) e Python 3.10 a 3.14.
+        - O mascaramento de segredos (`jishaku/secrets.py`) e o ambiente mínimo do `jsk sh` não podem regredir: toda
+          saída enviada ao Discord passa pelo mascaramento, e subprocessos não herdam o ambiente inteiro.
+        - Restrição de donos (`JISHAKU_OWNER_IDS`) e modo só-DM (`JISHAKU_DM_ONLY`) não podem ser contornados por
+          novos comandos ou caminhos de saída.
+        - Variável de ambiente nova entra documentada no README com o valor seguro como padrão.
+    - path: "tests/**"
+      instructions: |
+        - Todo ajuste de segurança ou de compatibilidade traz um teste de regressão curto; sem dependência de rede,
+          de tempo real ou de `sleep`.
+    - path: ".github/workflows/**"
+      instructions: |
+        - Actions fixadas por SHA completo com comentário da versão, `permissions` mínimas e nenhum
+          `pull_request_target` executando código do PR. A release é imutável: wheel e `SHA256SUMS` publicados pela
+          tag em `main`, com a versão igual à da tag.
+        - O ruleset "Main protegida" exige o CI (Lint, Wheel e Testes 3.10 a 3.14); não renomeie esses jobs sem avisar.
+    - path: "{pyproject.toml,requirements/**}"
+      instructions: |
+        - Dependência com limite de versão compatível (`disnake>=2.12,<3`, `import_expression>=1,<2`); nada de
+          dependência VCS.
+    - path: "**/*.md"
+      instructions: |
+        - Português do Brasil com acentuação correta; `CHANGELOG.md` no formato Keep a Changelog.
+
+  pre_merge_checks:
+    docstrings:
+      mode: off
+    title:
+      mode: warning
+      requirements: >-
+        Conventional Commits: tipo (feat, fix, refactor, docs, test, chore, perf, ci), escopo opcional e descrição curta.
+    description:
+      mode: warning
+    issue_assessment:
+      mode: off
+    custom_checks:
+      - name: "Sem segredos nem detalhe explorável"
+        mode: error
+        instructions: |
+          Falha se o diff adiciona a um arquivo público um segredo real (token, chave, senha, webhook) ou o passo a
+          passo explorável de uma vulnerabilidade ainda não corrigida. Valores sintéticos claramente falsos em testes
+          passam.
+
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+    simplify:
+      enabled: false
+
+  tools:
+    ruff:
+      enabled: true
+    actionlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    osvScanner:
+      enabled: true
+    zizmor:
+      enabled: true
+    github-checks:
+      enabled: true
+    pylint:
+      enabled: false
+    flake8:
+      enabled: false
+    languagetool:
+      enabled: false
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: local
+  issues:
+    scope: local
+  pull_requests:
+    scope: local
