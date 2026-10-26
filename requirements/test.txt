@@ -1,7 +1,0 @@
-click
-coverage
-flake8
-isort
-pytest
-pytest-cov
-pytest-mock

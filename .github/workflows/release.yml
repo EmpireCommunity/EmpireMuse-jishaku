@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publicar wheel e SHA256SUMS
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validar se a tag aponta para commit em origin/main
+        run: |
+          git fetch origin main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::A tag '${GITHUB_REF_NAME}' aponta para um commit que não pertence à branch main."
+            exit 1
+          fi
+
+      - name: Configurar Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Construir a wheel e conferir a tag com a versão
+        run: |
+          python -m pip install build
+          python -m build --wheel --outdir dist
+          VERSION=$(python -c "import re,pathlib; print(re.search(r\"__version__ = '([^']+)'\", pathlib.Path('jishaku/meta.py').read_text()).group(1))")
+          if [ "${GITHUB_REF_NAME}" != "v${VERSION}" ]; then
+            echo "::error::A tag '${GITHUB_REF_NAME}' não corresponde à versão ${VERSION} de jishaku/meta.py."
+            exit 1
+          fi
+          (cd dist && sha256sum -- *.whl > SHA256SUMS && cat SHA256SUMS)
+
+      - name: Criar o release com a wheel e o SHA256SUMS
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/*.whl dist/SHA256SUMS \
+            --title "empiremuse-jishaku ${GITHUB_REF_NAME#v}" \
+            --notes "Wheel e SHA256SUMS. Instale pela URL do asset com \`--hash=sha256:...\` (veja o README)."
