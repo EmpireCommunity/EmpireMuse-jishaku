@@ -98,7 +98,7 @@ pip install --require-hashes -r requirements/build.txt
 python -m build --wheel --no-isolation
 ```
 
-O CI (`.github/workflows/ci.yml`) roda lint, a suíte em Python 3.10–3.15 e a construção da wheel (duas vezes, com o mesmo SHA-256) com instalação num ambiente limpo. Uma tag `vX.Y.Z[.postN]` em `main` dispara o `release.yml`, que publica a wheel e o `SHA256SUMS`. Para reconstruir a mesma wheel, use `umask 022` e `SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)` (o hash muda com o modo dos arquivos, como o `LICENSE`). Mudanças seguem [Conventional Commits](https://www.conventionalcommits.org/pt-br/) e entram no [`CHANGELOG.md`](CHANGELOG.md).
+O CI (`.github/workflows/ci.yml`) roda lint, a suíte em Python 3.10–3.15 e a construção da wheel (duas vezes, com o mesmo SHA-256) com instalação num ambiente limpo. Uma tag `vX.Y.Z[.postN]` em `main` dispara o `release.yml`, que publica a wheel e o `SHA256SUMS`. Para reconstruir a mesma wheel, rode `umask 022` antes de clonar e `export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"` antes do build (o hash muda com o modo dos arquivos, como o `LICENSE`). Mudanças seguem [Conventional Commits](https://www.conventionalcommits.org/pt-br/) e entram no [`CHANGELOG.md`](CHANGELOG.md).
 
 Problemas de segurança: siga a [política do EmpireMuse](https://github.com/EmpireCommunity/EmpireMuse/blob/main/.github/SECURITY.md); não abra issue pública com detalhes exploráveis.
 
