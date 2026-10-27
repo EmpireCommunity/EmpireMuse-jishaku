@@ -41,6 +41,8 @@ jobs:
       - name: Construir a wheel e conferir a tag com a versão
         run: |
           python -m pip install --require-hashes -r requirements/build.txt
+          # Data fixa (a do commit) nas entradas da wheel: o rebuild isolado com o mesmo valor dá o mesmo SHA-256.
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
           python -m build --wheel --no-isolation --outdir dist
           VERSION=$(python -c "import re,pathlib; print(re.search(r\"__version__ = '([^']+)'\", pathlib.Path('jishaku/meta.py').read_text()).group(1))")
           if [ "${GITHUB_REF_NAME}" != "v${VERSION}" ]; then
