@@ -24,13 +24,12 @@ import asyncio
 
 import disnake
 from disnake.ext import commands
-from importlib import import_module as {0}
 
 import jishaku
 
-async def _repl_coroutine({{0}}):
+async def _repl_coroutine({0}):
     pass
-""".format(import_expression.constants.IMPORTER)
+"""
 
 
 def wrap_code(code: str, args: str = '') -> ast.Module:
