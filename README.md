@@ -21,7 +21,7 @@ O fork parte do commit `14d2dbd51d61382c687af8d8655f54f41674c0eb` do zRitsu, que
 
 - Distribuição: **`empiremuse-jishaku`** (nome distinto de `jishaku` e `disnake-jishaku` do PyPI, para que nenhuma instalação por nome troque este pacote por outro).
 - Pacote importável: **`jishaku`** (o mesmo do original; não instale os dois no mesmo ambiente).
-- Versão PEP 440 `2.6.6.post2`: base 2.6.6 (Kraots) mais o sufixo `.post` do fork. A fonte única é `jishaku/meta.py`.
+- Versão PEP 440 `2.6.6.post3`: base 2.6.6 (Kraots) mais o sufixo `.post` do fork. A fonte única é `jishaku/meta.py`.
 
 ## Instalação
 
@@ -34,7 +34,7 @@ pip install --no-deps --require-hashes -r requirements-jishaku.txt
 com um arquivo como
 
 ```text
-empiremuse-jishaku @ https://github.com/EmpireCommunity/EmpireMuse-jishaku/releases/download/v2.6.6.post2/empiremuse_jishaku-2.6.6.post2-py3-none-any.whl \
+empiremuse-jishaku @ https://github.com/EmpireCommunity/EmpireMuse-jishaku/releases/download/v2.6.6.post3/empiremuse_jishaku-2.6.6.post3-py3-none-any.whl \
     --hash=sha256:<valor do SHA256SUMS do release>
 ```
 
@@ -48,7 +48,7 @@ bot.load_extension("jishaku")
 
 Extras opcionais: `empiremuse-jishaku[voice]` (comandos de voz) e `empiremuse-jishaku[procinfo]` (uso de CPU e memória no `jsk`).
 
-Requisitos: Python 3.10 ou superior; testado com `disnake` 2.12.2 em Python 3.10 a 3.14.
+Requisitos: Python 3.10 ou superior; testado com `disnake` 2.12.2 em Python 3.10 a 3.15.
 
 ## Comandos
 
@@ -98,7 +98,7 @@ pip install --require-hashes -r requirements/build.txt
 python -m build --wheel --no-isolation
 ```
 
-O CI (`.github/workflows/ci.yml`) roda lint, a suíte em Python 3.10–3.14 e a construção da wheel com instalação num ambiente limpo. Uma tag `vX.Y.Z[.postN]` em `main` dispara o `release.yml`, que publica a wheel e o `SHA256SUMS`. Mudanças seguem [Conventional Commits](https://www.conventionalcommits.org/pt-br/) e entram no [`CHANGELOG.md`](CHANGELOG.md).
+O CI (`.github/workflows/ci.yml`) roda lint, a suíte em Python 3.10–3.15 e a construção da wheel (duas vezes, com o mesmo SHA-256) com instalação num ambiente limpo. Uma tag `vX.Y.Z[.postN]` em `main` dispara o `release.yml`, que publica a wheel e o `SHA256SUMS`. Mudanças seguem [Conventional Commits](https://www.conventionalcommits.org/pt-br/) e entram no [`CHANGELOG.md`](CHANGELOG.md).
 
 Problemas de segurança: siga a [política do EmpireMuse](https://github.com/EmpireCommunity/EmpireMuse/blob/main/.github/SECURITY.md); não abra issue pública com detalhes exploráveis.
 
