@@ -64,7 +64,7 @@ reviews:
         - O ruleset "Main protegida" exige o CI (Lint, Wheel e Testes 3.10 a 3.14); não renomeie esses jobs sem avisar.
     - path: "{pyproject.toml,requirements/**}"
       instructions: |
-        - Dependência com limite de versão compatível (`disnake>=2.12,<3`, `import_expression>=1,<2`); nada de
+        - Dependência com limite de versão compatível (`disnake>=2.12,<3`, `import_expression>=2,<3`); nada de
           dependência VCS.
     - path: "**/*.md"
       instructions: |

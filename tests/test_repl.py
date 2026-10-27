@@ -52,3 +52,11 @@ def test_executor_pode_ser_criado_fora_de_uma_corrotina():
         return [result async for _, result in AsyncSender(executor)]
 
     assert asyncio.run(collect()) == [1]
+
+
+def test_import_expression_resolve_modulo_com_ponto_de_exclamacao():
+    """`modulo!.attr` importa o módulo na hora (regressão do import_expression no Python 3.14)."""
+    import os
+
+    assert run("os!.getcwd()") == [os.getcwd()]
+    assert run("x = json!.dumps({'a': 1})\nx") == ['{"a": 1}']

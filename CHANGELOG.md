@@ -5,6 +5,17 @@ e as versões seguem o [PEP 440](https://peps.python.org/pep-0440/) (`2.6.6.post
 
 ## [Não lançado]
 
+## [2.6.6.post3] - 2026-10-27
+
+### Corrigido
+
+- `jsk py` com `modulo!.atributo` (ex.: `os!.getcwd()`) dava `SyntaxError` no Python 3.14. Passa a usar o `import_expression` 2.x (`>=2,<3`), como o upstream; some o alias interno `IMPORTER` do código do REPL. Teste incluído.
+
+### Alterado
+
+- Python 3.15 no CI e nos classificadores.
+- A wheel é construída com `SOURCE_DATE_EPOCH` (data do commit) e o CI confere que duas construções dão o mesmo SHA-256.
+
 ## [2.6.6.post2] - 2026-10-25
 
 ### Segurança
